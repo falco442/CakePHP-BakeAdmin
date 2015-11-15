@@ -54,8 +54,13 @@ class AppController extends Controller {
 	);
 	
 	public function beforeFilter(){
+		$icons = array(
+			'users'=>'fa-users',
+			'provinces'=>'fa-bullseye',
+			'customers'=>'fa-eur'
+		);
 		$this->theme = 'Sbadmin2';
 		$controllers = $this->ControllerList->getList();
-		$this->set(compact('controllers'));
+		$this->set(compact('controllers','icons'));
 	}
 }

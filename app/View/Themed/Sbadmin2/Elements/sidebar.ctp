@@ -1,10 +1,4 @@
 <?php 
-	$icons = array(
-		'users'=>'fa-users',
-		'provinces'=>'fa-bullseye',
-		'customers'=>'fa-eur'
-	);
-	
 	function getIcon($controller,$array){
 		$controller = strtolower($controller);
 		foreach($array as $key=>$value){
