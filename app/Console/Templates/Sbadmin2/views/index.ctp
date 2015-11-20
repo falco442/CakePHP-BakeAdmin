@@ -65,11 +65,7 @@
 	</p>
 	<div class="paging">
 	<?php
-		echo "<?php\n";
-		echo "\t\techo \$this->Paginator->prev('< ' . __('previous'), array(), null, array('class' => 'prev disabled'));\n";
-		echo "\t\techo \$this->Paginator->numbers(array('separator' => ''));\n";
-		echo "\t\techo \$this->Paginator->next(__('next') . ' >', array(), null, array('class' => 'next disabled'));\n";
-		echo "\t?>\n";
+		echo "<?php\n\t\techo \$this->Paginator->pagination(array(\n\t\t\t'ul' => 'pagination'\n\t\t));\n\t?>\n";
 	?>
 	</div>
 </div>
