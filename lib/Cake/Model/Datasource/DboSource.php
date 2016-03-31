@@ -538,16 +538,11 @@ class DboSource extends DataSource {
 
 		if (count($args) === 1) {
 			return $this->fetchAll($args[0]);
-		} elseif (count($args) > 1 && (strpos($args[0], 'findBy') === 0 || strpos($args[0], 'findAllBy') === 0)) {
+		} elseif (count($args) > 1 && preg_match('/^find(\w*)By(.+)/', $args[0], $matches)) {
 			$params = $args[1];
 
-			if (substr($args[0], 0, 6) === 'findBy') {
-				$all = false;
-				$field = Inflector::underscore(substr($args[0], 6));
-			} else {
-				$all = true;
-				$field = Inflector::underscore(substr($args[0], 9));
-			}
+			$findType = lcfirst($matches[1]);
+			$field = Inflector::underscore($matches[2]);
 
 			$or = (strpos($field, '_or_') !== false);
 			if ($or) {
@@ -580,7 +575,7 @@ class DboSource extends DataSource {
 				$conditions = array('OR' => $conditions);
 			}
 
-			if ($all) {
+			if ($findType !== 'first' && $findType !== '') {
 				if (isset($params[3 + $off])) {
 					$limit = $params[3 + $off];
 				}
@@ -592,7 +587,7 @@ class DboSource extends DataSource {
 				if (isset($params[5 + $off])) {
 					$recursive = $params[5 + $off];
 				}
-				return $args[2]->find('all', compact('conditions', 'fields', 'order', 'limit', 'page', 'recursive'));
+				return $args[2]->find($findType, compact('conditions', 'fields', 'order', 'limit', 'page', 'recursive'));
 			}
 			if (isset($params[3 + $off])) {
 				$recursive = $params[3 + $off];
@@ -739,9 +734,9 @@ class DboSource extends DataSource {
 /**
  * Returns a single field of the first of query results for a given SQL query, or false if empty.
  *
- * @param string $name Name of the field
- * @param string $sql SQL query
- * @return mixed Value of field read.
+ * @param string $name The name of the field to get.
+ * @param string $sql The SQL query.
+ * @return mixed Value of field read, or false if not found.
  */
 	public function field($name, $sql) {
 		$data = $this->fetchRow($sql);
@@ -1562,6 +1557,7 @@ class DboSource extends DataSource {
 					}
 				} else {
 					if (is_array($merge[0][$association])) {
+						$mergeAssocTmp = array();
 						foreach ($dataAssociation as $k => $v) {
 							if (!is_array($v)) {
 								$dataAssocTmp[$k] = $v;
@@ -2731,8 +2727,7 @@ class DboSource extends DataSource {
 				} elseif (is_array($value) && !empty($value) && !$valueInsert) {
 					$keys = array_keys($value);
 					if ($keys === array_values($keys)) {
-						$count = count($value);
-						if ($count === 1 && !preg_match('/\s+(?:NOT|\!=)$/', $key)) {
+						if (count($value) === 1 && !preg_match('/\s+(?:NOT|IN|\!=)$/', $key)) {
 							$data = $this->_quoteFields($key) . ' = (';
 							if ($quoteValues) {
 								if ($Model !== null) {
@@ -3209,7 +3204,7 @@ class DboSource extends DataSource {
  *
  * @param string $table The name of the table to update.
  * @param string $column The column to use when resetting the sequence value.
- * @return bool|void success.
+ * @return bool Success.
  */
 	public function resetSequence($table, $column) {
 	}
